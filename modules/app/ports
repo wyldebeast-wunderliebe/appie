@@ -1,0 +1,20 @@
+#!/bin/bash
+
+source $APPIE_BASE/includes
+source $MOD_BASE/includes
+
+NR_OF_PORTS=$1
+
+find_available_ports ${APPLICATION:=unknown} ${ENVIRONMENT:=unknown} $NR_OF_PORTS
+
+echo "# BEGIN app:ports settings" >> $HOME/$PROFILE_ID
+echo "#" >> $HOME/$PROFILE_ID
+
+echo "export APP_PORT_BASE=$APP_PORT_BASE" >> $HOME/$PROFILE_ID
+echo "export APP_PORT_LAST=$APP_PORT_LAST" >> $HOME/$PROFILE_ID
+
+echo "Assigned ports $APP_PORT_BASE till $APP_PORT_LAST"
+
+echo "#" >> $HOME/$PROFILE_ID
+echo "# END app:ports settings" >> $HOME/$PROFILE_ID
+echo "" >> $HOME/$PROFILE_ID

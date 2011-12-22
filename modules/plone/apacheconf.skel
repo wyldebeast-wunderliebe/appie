@@ -1,0 +1,11 @@
+<VirtualHost ${vhost}>
+
+  ServerName ${vhost}
+
+  ProxyPass /admin http://${host}:${port}/VirtualHostBase/http/${vhost}:80/VirtualHostRoot/_vh_admin
+
+  ProxyPass / http://${host}:${port}/VirtualHostBase/http/${vhost}:80/${base}/VirtualHostRoot/
+
+  CustomLog /var/log/apache2/${vhost}-access.log combined
+</VirtualHost>
+

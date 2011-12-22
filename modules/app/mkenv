@@ -1,0 +1,40 @@
+#!/bin/bash
+
+source $APPIE_BASE/includes
+source $MOD_BASE/includes
+
+APP=$1
+ENV=$2
+
+USAGE="
+Usage: genapp:createenv <app> <env>
+
+Generate application structure for one environment within an existing
+application
+
+app     Application id.
+env     Environment, usually one of tst, acc or prd.
+
+"
+
+# Check permissions
+#
+if [ `isAppAdmin` != "true" ]; then
+    echo "Looks like you're not an app admin. Too bad..."
+    exit 50
+fi
+
+if [ "$APP" = "help" -o -z "$APP" -o -z "$ENV" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+if [ `expr match $ENV '[a-z0-9A-Z]*'` -ne ${#ENV} ]; then
+    echo "Invalid environment id. You may want to read the manual..."
+    exit 10
+fi
+
+
+echo "Creating structure for application $APP $ENV"
+
+createEnv $APP $ENV "$APP $ENV user"

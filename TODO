@@ -1,0 +1,19 @@
+* auto apache config for plone
+  This should be a function within the Plone plugin, executable by root
+
+* apps over different machines
+  I suppose we could use public key authentication to enable this
+  transparantly
+
+* better re-configuration support for profile and other config files
+(zope.conf)
+
+* Solve additional locations for an application, like data dirs, etc.
+
+* SSH command profile settings?
+
+* Do we still need appuser group?
+
+* Fix for RH: change group for created user and change default mod 700
+  - discuss: do wee need application group?
+  - should appadmin create, then become the other group?

@@ -1,0 +1,50 @@
+Installation of Appie may be:
+  - installation from scratch
+  - upgrade to new version
+  - update of existing version
+
+In the first case, use 'make install', in the second case use 'make upgrade',
+in the last case use 'make update'.
+
+Installation from scratch is straightforward: type 'make install' as root
+user. This should be the only time you need to be root!
+
+You may also go for manual installation:
+
+* copy appie.conf.example to appie.conf and fill in the variables as
+  to you needs.
+* create group appadmin
+* Add all users that need to be able to work with appie to this group:
+    usermod -G appadmin <user id>
+* Make sure the directory specified in appie.conf as APP_BASE exists,
+  and that the group appadmin has write access to it, and the 's' bit
+  set. 
+
+
+You'll need to change the /etc/sudoers file as well... It should be
+configured like so:
+
+-------------
+
+# User alias specification
+#
+User_Alias APPADM = <list of users for appie admin tasks, comma separated>
+
+# Cmnd alias specification
+#
+Cmnd_Alias APP_SU = /bin/su - app-*
+Cmnd_Alias APP_GDEL = /usr/sbin/groupdel app-*
+Cmnd_Alias APP_UADD = /usr/sbin/useradd -d * -c * -s /bin/bash app-*
+Cmnd_Alias APP_UDEL = /usr/sbin/userdel -r app-*
+Cmnd_Alias APP_CHOWN = /bin/chown app-*
+Cmnd_Alias APP_UMOD = /usr/sbin/usermod -a -G app-* *
+
+# Add to user privilege specs
+#
+APPADM  ALL=NOPASSWD:APP_SU,APP_GDEL,APP_UADD,APP_UDEL,APP_CHOWN,APP_UMOD
+
+-------------
+
+Make sure this configuration doesn't override less specific settings,
+especially for 'su'. This might cause nasty problems... Also, check
+precise paths of the user- and group commands.

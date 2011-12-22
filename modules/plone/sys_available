@@ -1,0 +1,28 @@
+#!/bin/bash
+
+PACKAGE=$1
+
+source $APPIE_BASE/includes
+
+# Check permissions
+#
+if [ `isAppAdmin` != "true" ]; then
+    echo "Looks like you're not an app admin. Too bad..."
+    exit 50
+fi
+
+PACKAGE_LC=`echo $PACKAGE | awk '{ print tolower($1) }'`
+
+if [ -z "$PACKAGE" ]; then
+  echo "Usage: sys_available <package>"
+  exit 1;
+fi
+
+echo ""
+echo "Available packages of $PACKAGE on $PLONE_SOURCES"
+echo ""
+
+LIST=`$WGET -O - $PLONE_SOURCES/$PACKAGE_LC/releases/ | grep $PACKAGE_LC/releases | sed 's/<[^>]*>//g' | sed 's/^\ *//' | grep -E [0-9]+`
+
+echo "$LIST"
+echo ""

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+USAGE="Usage: become <app> <env>
+
+app    Application id
+env    Environment, tst, acc or prd
+"
+
+if [ "$1" = "help" ]; then
+  echo "$USAGE"
+  exit 1
+fi
+
+if [ -z "$1" -o -z "$2" ]; then
+  echo "$USAGE"
+  exit 1
+fi
+
+sudo su - "app-$1-$2"

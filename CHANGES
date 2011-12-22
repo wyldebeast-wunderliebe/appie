@@ -1,0 +1,42 @@
+Changelog
+=========
+
+1.7-SNAPSHOT (unreleased)
+-------------------------
+
+1.6 (2011-04-20)
+----------------
+
+* On app creation, change group of app dir so other appadmins can add envs.
+  [kh]
+* Extra warning for rmapp shows which dir will be removed.
+  [kh]
+
+1.5 (2011-03-07)
+----------------
+
+* Added list command to app module, to list applications and environments. [dd]
+* Added 'version' command to make appie show installed version [dd]
+* Fix doc: README no longer falsely claims an app group is created. 
+  (A group is created for each env.)
+  [kh]
+* Change permissions on APP_BASE dir after creation, no more need for a umask.
+  [kh]
+* Remove .svn dirs from /usr/local/appie after installation.
+  [kh]
+
+1.4 (2010-06-11)
+----------------
+
+* Remove appie.conf; force users to use appie.conf.example on new install.
+
+1.3 (2010-06-11)
+----------------
+
+* When installing newer version: overwrite existing symlink /usr/local/appie
+
+1.2 (2010-03-08)
+----------------
+
+* Renamed app/createenv to app/mkenv to conform to documentation in app/README
+  and app/main [hink]

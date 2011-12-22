@@ -1,0 +1,42 @@
+Use app to setup a base application environment. The main command for
+app does this, but more commands are available to move applications or
+environments, create and destroy environments, etc.
+
+The app module can set up an application structure based on a
+directory structure like the following, including users per
+environment, and a group for the whole application:
+
+$BASE/<app>/tst
+          ./acc
+          ./prd
+
+TST is an environment specifically for testing, ACC is for end-user
+acceptance and PRD is for production environments.
+
+Commands:
+
+* main (create app)
+
+Generate a full application structure. Some interactive questions will
+be asked, for example what environments to create, unless you specify
+all on the command line.
+
+
+* list
+
+List all applications and environments.
+
+
+* mkenv
+
+Create a single environment within an existing application.
+
+
+* rmapp
+
+Remove a complete application, including users and groups.
+
+
+* rmenv
+
+Remove an invironment, including the user.

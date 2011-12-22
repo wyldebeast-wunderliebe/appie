@@ -1,0 +1,92 @@
+# Create single user. Parameters are:
+# - user home
+# - Comment
+# - application id
+# - env id
+#
+createUser() {
+    sudo $USER_ADD -d "$1" -c "$2" -s /bin/bash "app-$3-$4"
+}
+
+
+# Create an environment, including the user
+#
+createEnv() {
+
+    APP=$1
+    USR=$2
+    COMM=$3
+
+    TGT="$APP_BASE/$APP/$USR"
+
+    createUser $TGT "$COMM" $APP $USR
+
+    if [ ! -d $TGT ]; then	
+	mkdir -p -m 2770 $TGT
+	sudo chown "app-$APP-$USR":"app-$APP-$USR" $TGT
+    fi
+
+    PROFILE_TMP=/tmp/profile-$APP-$USR
+
+    echo "# BEGIN general settings" > $PROFILE_TMP
+    echo "#" >> $PROFILE_TMP
+    echo "export APPLICATION=$APP" >> $PROFILE_TMP
+    echo "export ENVIRONMENT=$USR" >> $PROFILE_TMP
+
+    if [ "$USR" = "tst" ]; then
+	echo "export PACKAGES='unstable testing stable'" >> $PROFILE_TMP
+        echo 'export PS1="\[\e[1;37;42m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION\[\e[0m\]@\w$ "' >> $PROFILE_TMP
+    elif  [ "$USR" = "acc" ]; then
+	echo "export PACKAGES='testing stable'" >> $PROFILE_TMP
+        echo 'export PS1="\[\e[1;37;45m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION\[\e[0m\]@\w$ "' >> $PROFILE_TMP
+    elif  [ "$USR" = "prd" ]; then
+	echo "export PACKAGES=stable" >> $PROFILE_TMP
+	echo 'export PS1="\[\e[1;37;41m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION\[\e[0m\]@\w$ "' >> $PROFILE_TMP
+    fi
+
+    echo "#" >> $PROFILE_TMP
+    echo "# END general settings" >> $PROFILE_TMP
+    echo "" >> $PROFILE_TMP
+
+    sudo su - "app-$APP-$USR" -c "cp $PROFILE_TMP $TGT/$PROFILE_ID; chmod 600 $TGT/$PROFILE_ID"
+
+    rm $PROFILE_TMP
+}
+
+
+# Remove environment, including user and group
+#
+rmEnv() {
+
+    APP=$1
+    ENV=$2
+
+    sudo $USER_RM -r "app-$APP-$ENV"
+    sudo $GROUP_RM "app-$APP-$ENV"
+}
+
+
+# Create application directory
+#
+createApp() {
+    mkdir -p -m 2775 $APP_BASE/$APP
+    sudo chgrp appadmin $APP_BASE/$APP
+}
+
+
+rmApp() {
+
+    if [ `dirname $APP_BASE` = `dirname $APP_BASE/$APP` ]; then
+	return
+    fi
+
+    echo "Instead of removing the directory for $APP you can also
+make the application inactive..."
+    read -p "Remove? [y|N] : " REMOVE
+
+    if [ "$REMOVE" = "y" ]; then
+	rm -rf $APP_BASE/$APP
+    else
+	chmod 440 $APP_BASE/$APP
+    fi
+}

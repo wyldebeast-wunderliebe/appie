@@ -1,0 +1,87 @@
+#!/bin/bash
+
+source $APPIE_BASE/includes
+source $MOD_BASE/includes
+
+APP=$1
+
+USAGE="
+Usage: app <app> [env]*
+
+Generate application structure for one or more environments (tst, acc,
+prd). This will create a structure under $APP_BASE.
+
+app     Application id. This will also be the id of the group, and
+        part of the user id.
+env     Environments to create. One or more of tst, acc or prd.
+"
+
+if [ "$APP" = "help" -o -z "$APP" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+
+# Check permissions
+#
+if [ `isAppAdmin` != "true" ]; then
+    echo "You don't have permission to write to the APP_BASE dir."
+    exit 50
+fi
+
+if [ `expr match $APP '[a-z0-9A-Z]*'` -ne ${#APP} ]; then
+    echo "Invalid application id. You may want to read the manual..."
+    exit 10
+fi
+
+echo "Creating structure for application $APP"
+
+if [ -d "$APP_BASE/$APP" ]; then
+    echo "Directory already exists for $APP"
+    echo "You may want to use app:mkenv instead"
+    exit 10
+fi
+
+shift
+
+ENVS="$@"
+
+if [ -z "$ENVS" ]; then
+    create_tst=y
+    create_acc=y
+    create_prd=y
+
+    read -p "Create TST env? [Y/n]: " create_tst
+    read -p "Create ACC env? [Y/n]: " create_acc
+    read -p "Create PRD env? [Y/n]: " create_prd
+
+    if [ "$create_tst" = "y" ]; then
+	ENVS="$ENVS tst"
+    fi
+
+    if [ "$create_acc" = "y" ]; then
+	ENVS="$ENVS acc"
+    fi
+
+    if [ "$create_prd" = "y" ]; then
+	ENVS="$ENVS prd"
+    fi
+fi
+
+# Create the application
+#
+createApp $APP
+
+# Create user environments
+#
+for env in $ENVS; do
+
+    echo "Creating environment for $env..."
+
+    createEnv $APP $env "$APP $env user"
+
+    # Adding current user to app group
+    sudo $USER_MOD -a -G "app-$APP-$env" $USER
+
+    echo "done"
+done

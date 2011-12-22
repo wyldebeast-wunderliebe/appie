@@ -1,0 +1,13 @@
+# Big bad application base
+#
+export APP_BASE=/opt/APPS
+
+# ID of filename holding application environment profile
+#
+export PROFILE_ID=.profile
+
+# Application ports settings
+#
+export PORT_DB=$APPIE_BASE/var/ports.dat
+export PORT_BASE=8100
+export PORT_ALLOC=10

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+source $APPIE_BASE/includes
+source $MOD_BASE/includes
+
+APP=$1
+ENV=$2
+
+USAGE="
+Usage: app:rmenv <app> <env>
+
+Rmove application structure for one environment within an existing
+application
+
+app     Application id.
+env     Environment, usually one of tst, acc or prd.
+
+"
+
+# Check permissions
+#
+if [ `isAppAdmin` != "true" ]; then
+    echo "Looks like you're not an app admin. Too bad..."
+    exit 50
+fi
+
+if [ "$APP" = "help" -o -z "$APP" -o -z "$ENV" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+if [ `expr match $ENV '[a-z0-9A-Z]*'` -ne ${#ENV} ]; then
+    echo "Invalid environment id. You may want to read the manual..."
+    exit 10
+fi
+
+
+echo "Removing structure for application $APP $ENV"
+
+read -p "Are you SURE? Please say YES: " PROCEED
+
+if [ "$PROCEED" = "YES" ]; then
+    echo "as you wish..."
+    rmEnv $APP $ENV
+else
+    echo "Phew, that was close..."
+fi

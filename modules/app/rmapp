@@ -1,0 +1,53 @@
+#!/bin/bash
+
+source $APPIE_BASE/includes
+source $MOD_BASE/includes
+
+APP=$1
+
+USAGE="
+Usage: rmapp <app>
+
+Remove complete application structure, including users!
+
+app     Application id. This will also be the id of the group, and
+        part of the user id (<app>-tst).
+
+"
+
+if [ "$APP" = "help" -o -z "$APP" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+
+# Check permissions
+#
+if [ `isAppAdmin` != "true" ]; then
+    echo "Looks like you're not an app admin nor root. Too bad..."
+    exit 50
+fi
+
+echo "Removing structure for application $APP"
+
+if [ ! -d "" ]; then
+    echo "Application doesn't seem to exist."
+    exit 10
+fi
+
+echo "This will remove $APP_BASE/$APP."
+read -p "Are you SURE? Please say YES: " PROCEED
+
+if [ "$PROCEED" = "YES" ]; then
+    echo "as you wish..."
+
+    for usr in `ls $APP_BASE/$APP`; do
+
+	echo "Removing user $usr"
+	rmEnv $APP $usr
+    done
+
+    rmApp $APP
+else
+    echo "Phew, that was close..."
+fi

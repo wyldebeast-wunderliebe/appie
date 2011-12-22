@@ -1,0 +1,46 @@
+#!/bin/bash
+
+source $APPIE_BASE/includes
+source $MOD_BASE/includes
+
+USAGE="
+Usage: app:list
+
+List existing applications and environments.
+"
+
+if [ "$APP" = "help" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+
+# Check permissions
+#
+if [ `isAppAdmin` != "true" ]; then
+    echo "Looks like you're not an app admin. Too bad..."
+    exit 50
+fi
+
+if [ ! -d "$APP_BASE/$APP" ]; then
+    echo "No application base found in $APP_BASE"
+    exit 10
+fi
+
+echo ""
+
+for app in `ls $APP_BASE`; do
+    echo -e "  \E[34m$app\E[0m"
+    for env in `ls $APP_BASE/$app`; do
+      if [ "$env" = "tst" ]; then
+        echo -en "    \E[1;37;42mtst\E[0m"
+      elif [ "$env" = "acc" ]; then
+        echo -en "    \E[1;37;45macc\E[0m"
+      elif [ "$env" = "prd" ]; then
+        echo -en "    \E[1;37;41mprd\E[0m"
+      fi
+  done
+  echo ""
+done
+
+echo ""

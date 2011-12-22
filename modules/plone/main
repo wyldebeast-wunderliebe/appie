@@ -1,0 +1,102 @@
+#!/bin/sh
+
+USAGE="plone [version]"
+
+if [ "$1" = "help" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+VERSION=$1
+
+TGT="$APP_BASE/$APPLICATION/$ENVIRONMENT"
+
+if [ "$TGT" != "$HOME" ]; then
+    echo "Looks like $TGT is not your actual home"
+    echo "Please log in as the appropriate application environment user"
+    echo "using 'appie become $APPLICATION-$ENVIRONMENT'"
+    exit 1
+fi
+
+if [ ! -d $TGT ]; then
+    echo "Looks like there's no application set up in $TGT"
+    echo "Did you actually create one (using the app module)?"
+    exit 1
+fi
+
+# Zope is ZID from profile
+#
+ZOPE=$TGT/$ZID
+
+if [ ! -d $ZOPE ]; then
+    echo "No zope found in your home. I think you should install zope first"
+    exit 1
+fi
+
+MAJ_PYVERSION=`$APPIE zope:pythonversion`
+
+echo "You're using Python (major) version $MAJ_PYVERSION"
+
+# Find zope's
+#
+if [ -z "$VERSION" ]; then
+    echo "Available Plone versions"
+    echo
+    for plone in `ls $PLONE_BASE/py-$MAJ_PYVERSION | grep $PLONE_PREFIX`; do
+	echo "  ${plone:${#PLONE_PREFIX}}"
+    done
+
+    read -p "What version would you like to use?: " VERSION
+fi
+
+SRC=$PLONE_BASE/py-$MAJ_PYVERSION/$PLONE_PREFIX/$VERSION
+
+if [ ! -d $SRC ]; then
+    echo "No such version!"
+    echo "Check $PLONE_BASE/py-$MAJ_PYVERSION/ for versions"
+    exit 1
+fi
+
+if [ ! -d $TGT/resources/plone_products ]; then
+    mkdir -p $TGT/resources/plone_products
+fi
+
+if [ -h $ZOPE/Plone ]; then
+    echo "The link to Plone is already there"
+    read -p "Shall we upgrade? [y|N]" UPGRADE
+
+    if [ "$UPGRADE" != "y" ]; then
+	echo "Exiting without install"
+	exit 1
+    fi
+fi
+
+
+# Is it a container with it's own Products (and lib)?
+#
+if [ -d $SRC/Products ]; then
+    ln -s -f $SRC/Products $ZOPE/Plone
+else
+    ln -s -f $SRC $ZOPE/Plone
+fi
+
+if [ -d $SRC/lib ]; then
+    ln -s -f $SRC/lib/python/* $ZOPE/lib/python
+fi
+
+# Ok, let's add this link to the config file
+#
+ZCONF=$ZOPE/etc/zope.conf
+
+CUSTOMIZE=`grep -c 'BEGIN plone customize' $ZCONF`
+
+if [ $CUSTOMIZE -eq 0 ]; then
+    echo "" >> $ZCONF
+    echo "# BEGIN plone customize" >> $ZCONF
+    echo "#" >> $ZCONF
+    echo "products $ZOPE/Plone" >> $ZCONF
+    echo "#" >> $ZCONF
+    echo "# END plone customize" >> $ZCONF
+fi
+
+exit 0

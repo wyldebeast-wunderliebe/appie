@@ -1,0 +1,93 @@
+#
+# Library of functions, that may or may not be handy...
+#
+
+
+# Return 'true' if the user is indeed an appie admin
+# (can write to APP_BASE dir),
+# else return 'false'.
+# TODO: use 'groups'
+isAppAdmin() {
+
+    if [ -w "$APP_BASE" ]; then
+	echo "true"
+	return
+    fi
+
+    echo "false"
+}
+
+# Can user write to this target?
+#
+isWritable() {
+
+    if [ -w $1 ]; then
+	echo "true"
+	return
+    fi
+
+    echo "false"
+}
+
+
+# Check whether group given already exists in /etc/group
+#
+groupExists() {
+
+    GROUP=$1
+
+    if cat /etc/group | awk -F : '{ print $1 }' | grep -q $GROUP; then
+	echo "true"
+	return
+    fi
+    echo "false"
+}
+
+find_available_ports() {
+
+    APP=$1
+    USR=$2
+    PORTS=$3
+
+    PORTS=${PORTS:=$PORT_ALLOC}
+
+    APP_PORT_BASE=""
+    APP_PORT_LAST=""
+
+    if [ ! -e $PORT_DB ]; then
+	touch $PORT_DB
+	APP_PORT_BASE=$PORT_BASE
+    else
+	APP_PORT_BASE=`tail -1 $PORT_DB | awk '{print $1}'`
+    fi
+
+    echo `expr $APP_PORT_BASE + $PORTS` "($PORTS)" $APP $USR >> $PORT_DB
+    APP_PORT_LAST=`expr $APP_PORT_BASE + $PORTS - 1`
+}
+
+listModules() {
+
+    MODULES=""
+
+    for mod in `ls $APPIE_BASE/modules`; do
+    	if [ -e "$APPIE_BASE/modules/$mod/main" ]; then
+	    MODULES="$MODULES $mod"
+    	fi
+    done
+
+    echo $MODULES
+}
+
+listCommands() {
+
+    MODULE=$1
+    COMMANDS=""
+
+    for cmd in `ls $APPIE_BASE/modules/$MODULE`; do
+    	if [ -x "$APPIE_BASE/modules/$MODULE/$cmd" ]; then
+	    COMMANDS="$COMMANDS $cmd"
+    	fi
+    done
+
+    echo $COMMANDS
+}

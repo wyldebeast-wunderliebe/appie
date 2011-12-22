@@ -1,0 +1,166 @@
+******************************************************************************
+*
+*                                 APPIE!
+*
+******************************************************************************
+
+Contents
+--------
+0. Introduction
+1. General application setup
+2. Appie Modules
+3. Usage
+
+
+0. Introduction
+---------------
+
+Appie is the application maintenance tool for GW20E. Appie is a
+framework for modules that can perform specific tasks, like setting up
+and application environment, setting up a Plone instance, etc. Some
+module/command pairs require root permissions, like configuring
+Apache, but most tasks can be performed by common users, as long as
+they are member of the appadmin group.
+
+
+1. General application setup
+----------------------------
+
+Appie is based upon the notion of an application specific directory
+structure, where an application and its (specific) software resides
+in its own directory, and holds its own environment variables. The
+application has its own user.
+
+The structure for these application users is based upon idea that an
+application may need a maximum of three different environments,
+namely TST for testing, ACC for end user testing and PRD for
+production. An environment may be distributed over two machines, when
+clustered. Applications have a specific type, like for instance
+'zope', 'plone', etc. The type can be used to provide grouped shares
+for a type of application, for example shared sources.
+
+The application environment will be structured as follows:
+
+$APP_BASE/<application>/<environment>.
+
+Per application/environment pair, a user is created with the id
+app-<application>-<environment>. 
+
+Let's take an example. We have application appX.  We need an environment for
+TST and PRD. We'll end up having:
+
+Users:
+	appX-tst
+	appX-prd
+
+Groups:
+	appX: appX-tst, appX-prd
+
+Directories:
+	$APP_BASE/appX/tst
+	             ./prd
+
+
+All people in the group appadmin can switch to all environment (tst,
+acc, ...) specific users.  This can be achieved with the 'appie
+become' command, and the sudoers config file.
+
+For all users that need to be able to manage an application, or just
+one environment for an appliction add the visudo command):
+
+<user id>  ALL = NOPASSWD: /bin/su <app id>-<env id>
+
+You may use * instead of env id, to enable su to any environment.
+All users need to be able to login on a machine as themselves.
+
+Administrative users for Appie should be in the group appadmin, and
+this group should have write permissions on the APP_BASE.
+
+2. Appie Modules
+----------------
+
+A module for Appie is very simple: you'll need to add a directory to
+the modules dir, provide a number of shell scripts in that directory,
+with the default script named 'main'. Also, please provide the
+necessary reading material.
+
+A description of the module that can be displayed by appie, should be
+available in a file called DESCR.
+
+Any script should at least give some info when called with help as
+argument, and bail out.
+
+Modules preferrably should be able to do all necessary functionality
+based on command line parameters, and may provide interactive use on
+top of that.
+
+To use another module from your own module, use $APPIE <module>. APPIE
+ holds the global command for the appie interpreter.
+
+For module specific info, check the README within that module
+directory, if there is one...
+
+
+2.1 Application ports
+---------------------
+
+Some applications need one or more ports. Appie can assign one or more
+ports to an application, and will set the following environment
+setting, based on a port base, defined in appie.conf.
+
+APP_PORT_BASE
+APP_PORT_LAST
+
+The first will contain the base port for this application, the second
+will show the last of allocated ports.
+
+
+3. Configuration
+----------------
+
+Appie configuration files are:
+
+appie.conf	Main config file. Copy appie.conf.example to appie.conf
+		and adjust settings to your personal needs.
+hosts		List of appie enabled hosts
+
+Apart from that, every module may hold extra configuration in a file
+called <module id>.conf, within its own directory. All configuration
+will be available as global environment variables.
+
+
+4. Usage
+--------
+
+Use Appie as follows:
+
+	appie help | (<module[:command]> [module options])
+
+For example to start a new application environment, type:
+
+	appie app
+
+or (equivalent):
+
+	appie app:main
+
+
+3. Exit codes
+-------------
+
+An exit code of 0 is considered to be good, anything else isn't...
+Use codes like so:
+
+0 user intervention or regular stop
+1  Parameter problems
+50 Permission problems
+
+
+4. Prerequisites
+----------------
+
+Applications should conform to some rules, for appie to be able to
+work. Applications normally should be self contained, that means: all
+necessary stuff should be in the application directory. If this is not
+the case, extra directories to be used should be listed in the profile
+variable ADDITIONAL_LOCATIONS.

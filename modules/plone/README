@@ -1,0 +1,31 @@
+The appie plone plugin enables appadmins to make Plone versions
+available, and application environment users to install plone versions
+into their environment.
+
+
+The following commands are available:
+
+* sys_available
+
+Check what versions of Plone are available on the download site
+(configured in plone.conf).
+
+
+* sys_install [python version]
+
+Install a version of Plone onto a system. The user should have
+permission to install into that directory.
+
+
+* available
+
+Check what version of Plone is available on the system, and can be
+used to install into a local instance. Use this command as application
+user.
+
+
+* main
+
+Install a Plone version into you local instance. This is done by
+symlinking the version from within the python version that is used for
+your Zope instance.

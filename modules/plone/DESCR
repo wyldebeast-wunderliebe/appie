@@ -1,0 +1,2 @@
+The plone module holds several commands to install Plone sources
+systemwide, and to install Plone into an application environment.

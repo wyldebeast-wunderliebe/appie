@@ -1,0 +1,108 @@
+#!/bin/bash
+
+MOD=`echo $1 | awk -F ':' '{print $1}'`
+CMD=`echo $1 | awk -F ':' '{print $2}'`
+CMD=${CMD:-main}
+
+USAGE="
+Usage: appie help|version|<module>[:<command>] <options>
+
+module    Module id
+command   command id (defaults to 'main')
+options   module/command specific options
+
+type 'appie <module>[:<command>] help' for per command help
+
+type 'appie modules' for available modules, and 'appie commands
+<module>' for available commands per module.
+"
+
+
+if [ -z "$MOD" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+DIR=`dirname $0`
+
+if [ "$MOD" = "help" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+if [ "$MOD" = "version" ]; then
+    cat $DIR/VERSION 
+    exit 1
+fi
+
+if [ "$MOD" = "commands" ]; then
+
+    echo ""
+    if [ -e $DIR/modules/$2/DESCR ]; then
+	cat $DIR/modules/$2/DESCR
+	echo
+    else
+	echo "No description available"
+	echo
+    fi
+    echo ""
+    exit 1
+fi
+
+
+# Shift module:command parameter off the arguments stack
+#
+shift
+
+export APPIE=$0
+export APPIE_BASE=$DIR
+export MOD_BASE=$DIR/modules/$MOD
+
+# Load global config
+#
+. $DIR/appie.conf
+source $APPIE_BASE/includes
+
+if [ "$MOD" = "modules" ]; then
+
+    echo "Available modules:"
+    for mod in `listModules`; do
+
+	echo "* $mod"
+	if [ -e $DIR/modules/$mod/DESCR ]; then
+	    cat $DIR/modules/$mod/DESCR
+	    echo
+	else
+	    echo "No description available"
+	    echo
+	fi
+    done
+    echo ""
+    exit 1
+fi
+
+
+# Just to make sure, reload profile
+#
+if [ -e $HOME/$PROFILE_ID ]; then
+    . $HOME/$PROFILE_ID
+fi
+
+# Load module config if available
+#
+if [ -e $DIR/modules/$MOD/$MOD.conf ]; then
+    . $DIR/modules/$MOD/$MOD.conf
+fi
+
+
+# Last arrangements...
+#
+umask 0002
+
+# Execute command, and let's see what happens...
+#
+$DIR/modules/$MOD/$CMD $*
+
+# Return result of last command
+#
+exit $?

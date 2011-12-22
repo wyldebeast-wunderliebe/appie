@@ -1,0 +1,100 @@
+#!/bin/bash
+
+USAGE="zope [version]
+Install a zope instance from a common source as found in ZOPE_BASE
+(see zope.conf).
+
+version Specify a version (or leave blank to show available versions)
+"
+
+if [ "$1" = "help" ]; then
+    echo "$USAGE"
+    exit 1
+fi
+
+VERSION=$1
+
+TGT="$APP_BASE/$APPLICATION/$ENVIRONMENT"
+
+if [ "$TGT" != "$HOME" -o ! -w $TGT ]; then
+    echo "Looks like $TGT is not your actual home"
+    echo "Please log in as the appropriate application environment user"
+    echo "using 'appie become $APPLICATION-$ENVIRONMENT'"
+    exit 1
+fi
+
+
+if [ ! -d $TGT ]; then
+    echo "Looks like there's no application set up in $TGT"
+    echo "Did you run genapp?"
+    exit 1
+fi
+
+# Find zope's
+#
+if [ -z "$VERSION" ]; then
+
+    echo "Available zope versions:"
+    echo
+    for zope in `ls $ZOPE_BASE | grep ${ZOPE_PREFIX}`; do
+	echo "  ${zope:${#ZOPE_PREFIX}}"
+    done
+    echo
+    read -p "what version would you like to use?: " VERSION
+fi
+
+SRC=$ZOPE_BASE/${ZOPE_PREFIX}$VERSION
+
+if [ ! -d $SRC ]; then
+    echo "No such version!"
+    exit 1
+fi
+
+read -p "Please specify an admin user name? [admin]: " ZUSR
+
+while [ -z "$ZPWD" -o "$ZPWD" != "$ZPWD2" ]; do
+    read -p "Admin password?: " ZPWD
+    read -p "Please repeat: " ZPWD2
+done
+
+read -p "ZEO cluster (zeo, default) or single instance (zope)? : " ZTYPE
+
+if [ "$ZTYPE" = "zeo" ]; then
+    $SRC/bin/mkzeoinstance.py $TGT/zeo
+else
+    read -p "Please specify the name of your instance? [$ZOPE_INSTANCE_NAME]: " ZNAME
+    $SRC/bin/mkzopeinstance.py -d $TGT/${ZNAME:-$ZOPE_INSTANCE_NAME} -u ${ZUSR:-admin}:$ZPWD
+    read -p "Zope port offset (added to 8080)? [0]: " ZPORT
+fi
+
+# Adapt profile
+#
+echo "# BEGIN Zope profile settings" >> $TGT/$PROFILE_ID
+echo "#" >> $TGT/$PROFILE_ID
+echo "export ZTYPE=${ZTYPE:-zope}" >> $TGT/$PROFILE_ID
+echo "export ZVERSION=$VERSION" >> $TGT/$PROFILE_ID
+echo "export ZUSR=${ZUSR:-admin}" >> $TGT/$PROFILE_ID
+echo "export ZPWD=$ZPWD" >> $TGT/$PROFILE_ID
+echo "export ZID=${ZNAME:-$ZOPE_INSTANCE_NAME}" >> $TGT/$PROFILE_ID
+echo "#" >> $TGT/$PROFILE_ID
+echo "# END Zope profile settings" >> $TGT/$PROFILE_ID
+echo "" >> $TGT/$PROFILE_ID
+
+
+# Add zope specific configuration
+#
+ZCONF=$TGT/${ZNAME:-$ZOPE_INSTANCE_NAME}/etc/zope.conf
+
+CUSTOMIZE=`grep -c 'BEGIN zope customize' $ZCONF`
+
+if [ $CUSTOMIZE -eq 0 ]; then
+
+    echo "" >> $ZCONF
+    echo "# BEGIN zope customize" >> $ZCONF
+    echo "#" >> $ZCONF
+    echo "port-base $ZPORT" >> $ZCONF
+    echo "#" >> $ZCONF
+    echo "# END zope customize" >> $ZCONF
+fi
+
+exit 0

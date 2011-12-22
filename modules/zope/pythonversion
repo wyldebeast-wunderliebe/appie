@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PYTHON=`cat $HOME/$ZID/bin/runzope | grep -e ^PYTHON= | awk -F '=' '{print $2}' | sed 's/"//g'`
+PYVERSION=`$PYTHON -V 2>&1 | awk '{print $2}'`
+echo `expr substr $PYVERSION 1 3`
