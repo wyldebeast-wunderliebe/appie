@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.8
+-------------------------
+
+* Make dist now produces a deb file
+* installation places the sudo config in /etc/sudoers.d 
+
+
 1.7-SNAPSHOT (unreleased)
 -------------------------
 

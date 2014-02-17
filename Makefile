@@ -1,39 +1,35 @@
-VERSION=`cat VERSION`
-PRODUCT=appie
+VERSION := $(shell cat VERSION)
+PRODUCT = appie
+PACKAGE := appie-$(VERSION)
 
 default:
 	@echo $(VERSION)
-
-install:
-	@mkdir -p /usr/local/$(PRODUCT)-$(VERSION)
-	@ln -f -s -T /usr/local/$(PRODUCT)-$(VERSION) /usr/local/$(PRODUCT)
-	@cp -r * /usr/local/$(PRODUCT)-$(VERSION)
-	@find /usr/local/$(PRODUCT)-$(VERSION) -type d -name '.svn' -print0 | xargs -0 rm -rf 
-	./install.sh
-
-upgrade:
-	@mkdir -p /usr/local/$(PRODUCT)-$(VERSION)
-	@cp -r * /usr/local/$(PRODUCT)-$(VERSION)
-	@cp /usr/local/appie/appie.conf /usr/local/$(PRODUCT)-$(VERSION)
-	@ln -f -s -T /usr/local/$(PRODUCT)-$(VERSION) /usr/local/$(PRODUCT)
-
-update:
-	@cp -r * /usr/local/$(PRODUCT)-$(VERSION)
+	@echo $(PACKAGE)
 
 dist: struct
-	@fakeroot tar -czvf $(PRODUCT)-$(VERSION).tgz -C build ${PRODUCT}-${VERSION}
+	export PACKAGE=$(PACKAGE)
+	cp appie.conf build/$(PACKAGE)/etc
+	cp appie_sudo build/$(PACKAGE)/etc/sudoers.d/appie
+	cp includes build/$(PACKAGE)/usr/lib/appie
+	cp -r modules build/$(PACKAGE)/usr/lib/appie
+	cp appie build/$(PACKAGE)/usr/bin
+	chmod 0440 build/$(PACKAGE)/etc/sudoers.d/appie
+	chmod a+x build/$(PACKAGE)/usr/bin/appie
+	cp -r DEBIAN build/$(PACKAGE)
+	cd build; dpkg-deb --build $(PACKAGE)
+	cp build/$(PACKAGE).deb dist
 
 struct:
 	make realclean
-	@mkdir -p build/${PRODUCT}-${VERSION}
-	@cp VERSION includes install.sh appie appie.conf.example TODO INSTALL README Makefile --target-directory build/${PRODUCT}-${VERSION}
-	@cp -r modules build/${PRODUCT}-${VERSION}
-	rm -rf `find build -name CVS`
+	mkdir dist
+	mkdir -p build/$(PACKAGE)/etc/sudoers.d
+	mkdir -p build/$(PACKAGE)/usr/bin
+	mkdir -p build/$(PACKAGE)/usr/lib/appie
 
 clean:
 	rm -f `find . -name '*~'`
 	rm -f `find . -name '#*'`
 
 realclean: clean
-	rm -f *.tgz
+	rm -rf dist
 	rm -rf build

@@ -1,0 +1,12 @@
+# appie Cmnd alias specification
+#
+Cmnd_Alias APP_SU = /bin/su - app-*
+Cmnd_Alias APP_GDEL = /usr/sbin/groupdel app-*
+Cmnd_Alias APP_UADD = /usr/sbin/useradd -d * -c * -s /bin/bash app-*
+Cmnd_Alias APP_UDEL = /usr/sbin/userdel -r app-*
+Cmnd_Alias APP_CHOWN = /bin/chown app-*
+Cmnd_Alias APP_UMOD = /usr/sbin/usermod -a -G app-* *
+
+# Add to user privilege specs
+#
+%appadmin ALL=NOPASSWD:APP_SU,APP_GDEL,APP_UADD,APP_UDEL,APP_CHOWN,APP_UMOD

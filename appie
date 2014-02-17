@@ -4,6 +4,8 @@ MOD=`echo $1 | awk -F ':' '{print $1}'`
 CMD=`echo $1 | awk -F ':' '{print $2}'`
 CMD=${CMD:-main}
 
+LIB_DIR=/usr/lib/appie
+
 USAGE="
 Usage: appie help|version|<module>[:<command>] <options>
 
@@ -31,19 +33,19 @@ if [ "$MOD" = "help" ]; then
 fi
 
 if [ "$MOD" = "version" ]; then
-    cat $DIR/VERSION 
+    cat $LIB_DIR/VERSION 
     exit 1
 fi
 
 if [ "$MOD" = "commands" ]; then
 
     echo ""
-    if [ -e $DIR/modules/$2/DESCR ]; then
-	cat $DIR/modules/$2/DESCR
-	echo
+    if [ -e $LIB_DIR/modules/$2/DESCR ]; then
+	      cat $LIB_DIR/modules/$2/DESCR
+	      echo
     else
-	echo "No description available"
-	echo
+	      echo "No description available"
+	      echo
     fi
     echo ""
     exit 1
@@ -55,27 +57,30 @@ fi
 shift
 
 export APPIE=$0
-export APPIE_BASE=$DIR
-export MOD_BASE=$DIR/modules/$MOD
+export APPIE_BASE=$LIB_DIR
+export MOD_BASE=$LIB_DIR/modules/$MOD
 
 # Load global config
 #
-. $DIR/appie.conf
-source $APPIE_BASE/includes
+. /etc/appie.conf
+
+# Load includes
+#
+source $LIB_DIR/includes
 
 if [ "$MOD" = "modules" ]; then
 
     echo "Available modules:"
     for mod in `listModules`; do
 
-	echo "* $mod"
-	if [ -e $DIR/modules/$mod/DESCR ]; then
-	    cat $DIR/modules/$mod/DESCR
-	    echo
-	else
-	    echo "No description available"
-	    echo
-	fi
+	      echo "* $mod"
+	      if [ -e $LIB_DIR/modules/$mod/DESCR ]; then
+	          cat $LIB_DIR/modules/$mod/DESCR
+	          echo
+	      else
+	          echo "No description available"
+	          echo
+	      fi
     done
     echo ""
     exit 1
@@ -90,10 +95,9 @@ fi
 
 # Load module config if available
 #
-if [ -e $DIR/modules/$MOD/$MOD.conf ]; then
-    . $DIR/modules/$MOD/$MOD.conf
+if [ -e $LIB_DIR/modules/$MOD/$MOD.conf ]; then
+    . $LIB_DIR/modules/$MOD/$MOD.conf
 fi
-
 
 # Last arrangements...
 #
@@ -101,7 +105,7 @@ umask 0002
 
 # Execute command, and let's see what happens...
 #
-$DIR/modules/$MOD/$CMD $*
+$LIB_DIR/modules/$MOD/$CMD $*
 
 # Return result of last command
 #

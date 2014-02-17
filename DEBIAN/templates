@@ -1,0 +1,4 @@
+Template: appie/path
+Type: [string]
+Default: /opt/APPS
+Description: Where would you like your apps to reside?

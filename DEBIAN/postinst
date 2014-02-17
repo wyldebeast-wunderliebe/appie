@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. /etc/appie.conf
+ 
+groupadd appadmin
+mkdir -p $APP_BASE
+chgrp appadmin $APP_BASE
+chmod 775 $APP_BASE
+mkdir -p var
+
+chown root:root /etc/sudoers.d/appie
+
+echo "Summarize:
+  created $APP_BASE with mode drwxrws---
+  created group appadmin
+  set group of $APP_BASE to appadmin
+
+You may want to add users to the appadmin group, so as they can
+actually USE appie...
+
+Do this using usermod -a -G <group> <user id>
+"
