@@ -16,7 +16,7 @@ dist: struct
 	chmod 0440 build/$(PACKAGE)/etc/sudoers.d/appie
 	chmod a+x build/$(PACKAGE)/usr/bin/appie
 	cp -r DEBIAN build/$(PACKAGE)
-	cd build; dpkg-deb --build $(PACKAGE)
+	cd build; fakeroot dpkg-deb --build $(PACKAGE)
 	cp build/$(PACKAGE).deb dist
 
 struct:

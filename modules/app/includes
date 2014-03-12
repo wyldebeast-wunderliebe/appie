@@ -22,26 +22,41 @@ createEnv() {
     createUser $TGT "$COMM" $APP $USR
 
     if [ ! -d $TGT ]; then	
-	mkdir -p -m 2770 $TGT
-	sudo chown "app-$APP-$USR":"app-$APP-$USR" $TGT
+    	mkdir -p -m 2775 $TGT
+	    sudo chown "app-$APP-$USR":"app-$APP-$USR" $TGT
     fi
 
     PROFILE_TMP=/tmp/profile-$APP-$USR
 
-    echo "# BEGIN general settings" > $PROFILE_TMP
+    echo "# Check on virtual env" >> $PROFILE_TMP
+    echo 'if [ -e $HOME/bin/activate ]; then' >> $PROFILE_TMP
+    echo '  . $HOME/bin/activate' >> $PROFILE_TMP
+    echo 'fi' >> $PROFILE_TMP
+    echo "" >> $PROFILE_TMP
+
+    echo "" >> $PROFILE_TMP
+    echo "# Check release info" >> $PROFILE_TMP
+    echo "RELEASE=" >> $PROFILE_TMP
+    echo 'if [ -e $HOME/app-release ]; then' >> $PROFILE_TMP
+    echo '  RELEASE=`cat $HOME/app-release|head -1`' >> $PROFILE_TMP
+    echo '  RELEASE=[$RELEASE]' >> $PROFILE_TMP 
+    echo 'fi' >> $PROFILE_TMP
+    echo "" >> $PROFILE_TMP
+
+    echo "# BEGIN general settings" >> $PROFILE_TMP
     echo "#" >> $PROFILE_TMP
     echo "export APPLICATION=$APP" >> $PROFILE_TMP
     echo "export ENVIRONMENT=$USR" >> $PROFILE_TMP
 
     if [ "$USR" = "tst" ]; then
-	echo "export PACKAGES='unstable testing stable'" >> $PROFILE_TMP
-        echo 'export PS1="\[\e[1;37;42m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION\[\e[0m\]@\w$ "' >> $PROFILE_TMP
+	      echo "export PACKAGES='unstable testing stable'" >> $PROFILE_TMP
+        echo 'export PS1="\[\e[1;37;42m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION$RELEASE\[\e[0m\]@\w$ "' >> $PROFILE_TMP
     elif  [ "$USR" = "acc" ]; then
-	echo "export PACKAGES='testing stable'" >> $PROFILE_TMP
-        echo 'export PS1="\[\e[1;37;45m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION\[\e[0m\]@\w$ "' >> $PROFILE_TMP
+	      echo "export PACKAGES='testing stable'" >> $PROFILE_TMP
+        echo 'export PS1="\[\e[1;37;45m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION$RELEASE\[\e[0m\]@\w$ "' >> $PROFILE_TMP
     elif  [ "$USR" = "prd" ]; then
-	echo "export PACKAGES=stable" >> $PROFILE_TMP
-	echo 'export PS1="\[\e[1;37;41m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION\[\e[0m\]@\w$ "' >> $PROFILE_TMP
+	      echo "export PACKAGES=stable" >> $PROFILE_TMP
+	      echo 'export PS1="\[\e[1;37;41m\]$ENVIRONMENT\[\e[0m\e[34m\] $APPLICATION$RELEASE\[\e[0m\]@\w$ "' >> $PROFILE_TMP
     fi
 
     echo "#" >> $PROFILE_TMP

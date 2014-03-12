@@ -4,6 +4,6 @@ Section: base
 Installed-Size: 666
 Maintainer: Duco Dokter
 Architecture: all
-Version: 1.8.0
+Version: 1.8.1
 Depends: sudo (>= 1.7.2), debconf (>= 0.2.26)
 Description: Appie application maintenance app.
